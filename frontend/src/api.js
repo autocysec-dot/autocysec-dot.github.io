@@ -28,17 +28,29 @@ async function request(path, { method = 'GET', body, auth = false } = {}) {
     const token = getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
   }
+  // Retry transient network failures (the tunnel occasionally blips for a
+  // second or two). Only retries connection errors, never HTTP error responses.
+  const maxAttempts = 3;
   let res;
-  try {
-    res = await fetch(`${getApiBase()}${path}`, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    });
-  } catch (e) {
-    throw new Error(
-      `Cannot reach the backend at ${getApiBase()}. Is it running on your laptop? (npm start in the backend folder)`
-    );
+  let lastErr;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      res = await fetch(`${getApiBase()}${path}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      lastErr = null;
+      break;
+    } catch (e) {
+      lastErr = e;
+      if (attempt < maxAttempts) {
+        await new Promise((r) => setTimeout(r, attempt * 700)); // 0.7s, then 1.4s
+      }
+    }
+  }
+  if (lastErr) {
+    throw new Error('The CRA service is temporarily unavailable. Please try again in a moment.');
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
