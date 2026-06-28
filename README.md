@@ -46,8 +46,7 @@ The tool's backend URL is configurable in the app's **Settings** screen (default
 Automated via GitHub Actions on every push to `main`. The workflow builds the React app and
 assembles the site so the landing page is served at the root and the tool at `/complyps-cra/`.
 
-Live (until the custom domain is connected): https://autocysec-dot.github.io/
-Custom domain (planned): https://complyps.com/
+Live: https://complyps.com/ (custom domain; CNAME file kept in `website/CNAME`).
 
 ## Roadmap
 
