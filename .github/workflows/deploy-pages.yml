@@ -2,8 +2,9 @@ name: Deploy ComplyPS site to GitHub Pages
 
 # Builds the public site and publishes it to GitHub Pages on every push to main.
 # Layout published:
-#   /                -> ComplyPS landing page (website/index.html)
-#   /complyps-cra/   -> the CRA tool (built React app from frontend/)
+#   /                    -> ComplyPS company home (website/index.html)
+#   /complyps-cra/       -> CRA solution landing page (website/complyps-cra/index.html)
+#   /complyps-cra/app/   -> the CRA tool (built React app from frontend/)
 # The backend is private and runs separately on the laptop — it is NOT here.
 on:
   push:
@@ -35,12 +36,13 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: npm run build
-      - name: Assemble site (landing at root, tool under /complyps-cra/)
+      - name: Assemble site (home at /, CRA page at /complyps-cra/, tool at /complyps-cra/app/)
         run: |
           rm -rf _site
-          mkdir -p _site/complyps-cra
+          mkdir -p _site
           cp -r website/* _site/
-          cp -r frontend/dist/* _site/complyps-cra/
+          mkdir -p _site/complyps-cra/app
+          cp -r frontend/dist/* _site/complyps-cra/app/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

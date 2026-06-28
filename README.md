@@ -2,8 +2,12 @@
 
 Public site for **ComplyPS** (Comply Product Security). Hosted on GitHub Pages.
 
-- **`/`** — the ComplyPS landing page (`website/index.html`).
-- **`/complyps-cra/`** — the CRA compliance tool UI (a React app built from `frontend/`).
+- **`/`** — the ComplyPS company home (`website/index.html`) — the suite of solutions.
+- **`/complyps-cra/`** — the CRA solution landing page (`website/complyps-cra/index.html`).
+- **`/complyps-cra/app/`** — the CRA tool UI (a React app built from `frontend/`).
+
+The site is a hierarchy: ComplyPS home → per-regulation solution page → that regulation's tool(s).
+Future regulations (NIS2, RED) get their own `/<regulation>/` section the same way.
 
 > This repository contains only the public website and the **frontend** of the CRA tool. The
 > frontend has no compliance logic — it calls a separate backend service for all classification and
@@ -12,12 +16,14 @@ Public site for **ComplyPS** (Comply Product Security). Hosted on GitHub Pages.
 ## Structure
 
 ```
-website/                 ComplyPS landing page (static HTML + Tailwind CDN)
-  index.html
-frontend/                CRA tool UI (React + Vite)
+website/
+  index.html             ComplyPS company home  (served at /)
+  complyps-cra/
+    index.html           CRA solution landing   (served at /complyps-cra/)
+frontend/                CRA tool UI (React + Vite) -> built to /complyps-cra/app/
   src/ ...
 .github/workflows/
-  deploy-pages.yml       builds & deploys: landing at /, tool at /complyps-cra/
+  deploy-pages.yml       builds & assembles the hierarchy and deploys to Pages
 ```
 
 ## Local development
