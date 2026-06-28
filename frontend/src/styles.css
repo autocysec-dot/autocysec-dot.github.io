@@ -34,7 +34,8 @@ a { color: #60a5fa; }
   top: 0;
   z-index: 10;
 }
-.nav .brand { font-weight: 700; font-size: 18px; }
+.nav .brand { font-weight: 800; font-size: 18px; color: var(--text); text-decoration: none; }
+.nav a.brand:hover { color: var(--text); }
 .nav .brand span { color: #60a5fa; }
 .nav .spacer { flex: 1; }
 .nav a { color: var(--muted); text-decoration: none; }

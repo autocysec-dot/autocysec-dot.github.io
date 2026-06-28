@@ -43,10 +43,18 @@ export default function Classifier() {
   function setSingle(qid, value) {
     setAnswers({ ...answers, [qid]: value });
   }
-  function toggleMulti(qid, value) {
-    const arr = answers[qid] || [];
-    const next = arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value];
-    setAnswers({ ...answers, [qid]: next });
+  function toggleMulti(q, value) {
+    const arr = answers[q.id] || [];
+    const exclusive = new Set(q.options.filter((o) => o.exclusive).map((o) => o.value));
+    let next;
+    if (arr.includes(value)) {
+      next = arr.filter((v) => v !== value);
+    } else if (exclusive.has(value)) {
+      next = [value]; // picking "None"/"Not sure" clears any specific selections
+    } else {
+      next = [...arr.filter((v) => !exclusive.has(v)), value]; // picking a specific item clears the exclusive ones
+    }
+    setAnswers({ ...answers, [q.id]: next });
   }
 
   async function next() {
@@ -150,7 +158,7 @@ export default function Classifier() {
                     name={q.id}
                     checked={selected}
                     onChange={() =>
-                      q.type === 'multi' ? toggleMulti(q.id, opt.value) : setSingle(q.id, opt.value)
+                      q.type === 'multi' ? toggleMulti(q, opt.value) : setSingle(q.id, opt.value)
                     }
                   />
                   <span className="opt-label">{opt.label}</span>

@@ -49,6 +49,7 @@ export const api = {
   health: () => request('/api/health'),
   register: (payload) => request('/api/auth/register', { method: 'POST', body: payload }),
   login: (payload) => request('/api/auth/login', { method: 'POST', body: payload }),
+  passwordPolicy: () => request('/api/auth/password-policy'),
   me: () => request('/api/auth/me', { auth: true }),
 
   questionnaire: () => request('/api/assessments/questionnaire'),

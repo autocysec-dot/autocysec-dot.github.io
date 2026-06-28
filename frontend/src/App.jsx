@@ -12,10 +12,15 @@ function Nav() {
   const navigate = useNavigate();
   return (
     <nav className="nav">
-      <div className="brand">CRA<span>·</span>Compliance</div>
+      {/* Leave the SPA and go back up to the ComplyPS site. The tool is served
+          at /complyps-cra/app/, so ../../ is the ComplyPS home and ../ is the
+          CRA solution page. */}
+      <a href="../../" className="brand" title="Back to ComplyPS">
+        Comply<span>PS</span>
+      </a>
+      <a href="../" className="muted small" title="CRA solution page">← CRA</a>
       <NavLink to="/" end>Classify</NavLink>
       {user && <NavLink to="/assessments">My assessments</NavLink>}
-      <NavLink to="/settings">Settings</NavLink>
       <div className="spacer" />
       {user ? (
         <>
