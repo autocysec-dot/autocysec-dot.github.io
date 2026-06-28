@@ -48,6 +48,19 @@ export default function AssessmentDetail() {
         </div>
       </div>
 
+      <div className="card">
+        <h2>EU Declaration of Conformity</h2>
+        <p className="muted small">
+          Generate a CRA Annex V declaration from this assessment — classification and conformity
+          route are filled in automatically. Download or print to PDF.
+        </p>
+        <div className="btn-row">
+          <Link className="btn" to={`/assessments/${assessment.id}/declaration`}>
+            {assessment.declaration ? 'Edit declaration' : 'Generate declaration'}
+          </Link>
+        </div>
+      </div>
+
       <div className="btn-row">
         <button className="btn secondary" onClick={exportJson}>Export as JSON</button>
       </div>

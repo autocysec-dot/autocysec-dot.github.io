@@ -69,6 +69,9 @@ export const api = {
   annex1: () => request('/api/assessments/annex1'),
   saveSelfAssessment: (id, responses) =>
     request(`/api/assessments/${id}/self-assessment`, { method: 'PUT', body: { responses }, auth: true }),
+  declarationFields: () => request('/api/assessments/declaration/fields'),
+  saveDeclaration: (id, fields) =>
+    request(`/api/assessments/${id}/declaration`, { method: 'PUT', body: { fields }, auth: true }),
 
   listAssessments: () => request('/api/assessments', { auth: true }),
   getAssessment: (id) => request(`/api/assessments/${id}`, { auth: true }),

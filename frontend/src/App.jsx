@@ -5,6 +5,7 @@ import Classifier from './pages/Classifier.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import AssessmentDetail from './pages/AssessmentDetail.jsx';
 import SelfAssessment from './pages/SelfAssessment.jsx';
+import Declaration from './pages/Declaration.jsx';
 import Settings from './pages/Settings.jsx';
 
 function Nav() {
@@ -62,6 +63,10 @@ export default function App() {
         <Route
           path="/assessments/:id/self-assessment"
           element={<RequireAuth><SelfAssessment /></RequireAuth>}
+        />
+        <Route
+          path="/assessments/:id/declaration"
+          element={<RequireAuth><Declaration /></RequireAuth>}
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
