@@ -5,4 +5,4 @@
 // It must point at your backend's PUBLIC URL (e.g. the Cloudflare Tunnel URL,
 // or https://api.complyps.com once you set up a named tunnel on your domain).
 // Users can still override it in the app's Settings screen.
-window.CRA_API_BASE = "https://receives-riders-february-tulsa.trycloudflare.com";
+window.CRA_API_BASE = "https://api.complyps.com";
