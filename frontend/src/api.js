@@ -73,6 +73,17 @@ export const api = {
   saveDeclaration: (id, fields) =>
     request(`/api/assessments/${id}/declaration`, { method: 'PUT', body: { fields }, auth: true }),
 
+  // Vulnerability & incident register (all reporting logic computed server-side)
+  registerMeta: () => request('/api/register/meta'),
+  listVulnerabilities: () => request('/api/register/vulnerabilities', { auth: true }),
+  createVulnerability: (body) => request('/api/register/vulnerabilities', { method: 'POST', body, auth: true }),
+  updateVulnerability: (id, body) => request(`/api/register/vulnerabilities/${id}`, { method: 'PUT', body, auth: true }),
+  deleteVulnerability: (id) => request(`/api/register/vulnerabilities/${id}`, { method: 'DELETE', auth: true }),
+  listIncidents: () => request('/api/register/incidents', { auth: true }),
+  createIncident: (body) => request('/api/register/incidents', { method: 'POST', body, auth: true }),
+  updateIncident: (id, body) => request(`/api/register/incidents/${id}`, { method: 'PUT', body, auth: true }),
+  deleteIncident: (id) => request(`/api/register/incidents/${id}`, { method: 'DELETE', auth: true }),
+
   listAssessments: () => request('/api/assessments', { auth: true }),
   getAssessment: (id) => request(`/api/assessments/${id}`, { auth: true }),
   saveAssessment: (payload) => request('/api/assessments', { method: 'POST', body: payload, auth: true }),

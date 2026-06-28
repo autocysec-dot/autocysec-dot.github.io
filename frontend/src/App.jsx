@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import AssessmentDetail from './pages/AssessmentDetail.jsx';
 import SelfAssessment from './pages/SelfAssessment.jsx';
 import Declaration from './pages/Declaration.jsx';
+import Register from './pages/Register.jsx';
 import Settings from './pages/Settings.jsx';
 
 function Nav() {
@@ -22,6 +23,7 @@ function Nav() {
       <a href="../" className="muted small" title="CRA solution page">← CRA</a>
       <NavLink to="/" end>Classify</NavLink>
       {user && <NavLink to="/assessments">My assessments</NavLink>}
+      {user && <NavLink to="/register">Register</NavLink>}
       <div className="spacer" />
       {user ? (
         <>
@@ -55,6 +57,10 @@ export default function App() {
         <Route
           path="/assessments"
           element={<RequireAuth><Dashboard /></RequireAuth>}
+        />
+        <Route
+          path="/register"
+          element={<RequireAuth><Register /></RequireAuth>}
         />
         <Route
           path="/assessments/:id"
