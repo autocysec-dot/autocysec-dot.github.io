@@ -2,7 +2,10 @@
 // configurable so the same static build (hosted on GitHub Pages) can point at
 // localhost. Users can override it from the Settings screen (stored locally).
 
-const DEFAULT_API = 'http://localhost:4000';
+// Default backend URL. Set at runtime by public/config.js (window.CRA_API_BASE)
+// so it can be changed without rebuilding; falls back to localhost for local dev.
+const DEFAULT_API =
+  (typeof window !== 'undefined' && window.CRA_API_BASE) || 'http://localhost:4000';
 
 export function getApiBase() {
   return localStorage.getItem('cra_api_base') || DEFAULT_API;
