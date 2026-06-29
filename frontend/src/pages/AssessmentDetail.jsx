@@ -62,6 +62,19 @@ export default function AssessmentDetail() {
       </div>
 
       <div className="card">
+        <h2>SBOM — software bill of materials</h2>
+        <p className="muted small">
+          Track your components (Annex I, Part II) and export a CycloneDX file.
+          {assessment.sbom?.summary ? ` ${assessment.sbom.summary.count} component(s) recorded.` : ''}
+        </p>
+        <div className="btn-row">
+          <Link className="btn" to={`/assessments/${assessment.id}/sbom`}>
+            {assessment.sbom ? 'Edit SBOM' : 'Create SBOM'}
+          </Link>
+        </div>
+      </div>
+
+      <div className="card">
         <h2>Technical documentation (Annex VII)</h2>
         <p className="muted small">
           Aggregates your classification, Annex I self-assessment and declaration, and collects the

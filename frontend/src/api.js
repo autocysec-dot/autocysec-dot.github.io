@@ -75,6 +75,9 @@ export const api = {
   techdocFields: () => request('/api/assessments/techdoc/fields'),
   saveTechDoc: (id, fields) =>
     request(`/api/assessments/${id}/techdoc`, { method: 'PUT', body: { fields }, auth: true }),
+  saveSbom: (id, components) =>
+    request(`/api/assessments/${id}/sbom`, { method: 'PUT', body: { components }, auth: true }),
+  exportSbom: (id) => request(`/api/assessments/${id}/sbom/export`, { auth: true }),
 
   // Vulnerability & incident register (all reporting logic computed server-side)
   registerMeta: () => request('/api/register/meta'),
