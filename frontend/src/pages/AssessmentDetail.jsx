@@ -38,6 +38,16 @@ export default function AssessmentDetail() {
       </p>
       <ResultView result={assessment.result} />
 
+      <div className="card" style={{ borderColor: 'var(--primary)' }}>
+        <h2>📦 Compliance package</h2>
+        <p className="muted small">
+          One consolidated, printable dossier of everything for this product, with a completeness score.
+        </p>
+        <div className="btn-row">
+          <Link className="btn" to={`/assessments/${assessment.id}/package`}>Open compliance package</Link>
+        </div>
+      </div>
+
       <div className="card">
         <h2>Annex I self-assessment</h2>
         <AnnexReadiness sa={assessment.selfAssessment} />

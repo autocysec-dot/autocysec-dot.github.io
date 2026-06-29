@@ -10,6 +10,7 @@ import Declaration from './pages/Declaration.jsx';
 import TechDoc from './pages/TechDoc.jsx';
 import Sbom from './pages/Sbom.jsx';
 import SupportPeriod from './pages/SupportPeriod.jsx';
+import Package from './pages/Package.jsx';
 import Register from './pages/Register.jsx';
 import CvdPolicy from './pages/CvdPolicy.jsx';
 import Settings from './pages/Settings.jsx';
@@ -100,6 +101,10 @@ export default function App() {
         <Route
           path="/assessments/:id/support"
           element={<RequireAuth><SupportPeriod /></RequireAuth>}
+        />
+        <Route
+          path="/assessments/:id/package"
+          element={<RequireAuth><Package /></RequireAuth>}
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
