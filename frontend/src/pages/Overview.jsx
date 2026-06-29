@@ -33,6 +33,9 @@ export default function Overview() {
         <Stat label="Avg Annex I readiness" value={summary.avgReadiness == null ? '—' : `${summary.avgReadiness}%`} color={readinessColor} />
         <Stat label="Reporting overdue" value={reporting.overdue} color={reporting.overdue ? 'var(--red)' : 'var(--green)'} sub={`${reporting.dueSoon} due soon`} />
         <Stat label="Open vulns / incidents" value={`${reporting.openVulnerabilities} / ${reporting.openIncidents}`} />
+        <Stat label="Support periods" value={summary.support.expired + summary.support.endingSoon === 0 ? 'OK' : `${summary.support.expired + summary.support.endingSoon}`}
+          color={summary.support.expired ? 'var(--red)' : summary.support.endingSoon ? 'var(--amber)' : 'var(--green)'}
+          sub={`${summary.support.expired} expired · ${summary.support.endingSoon} ending soon · ${summary.support.notSet} not set`} />
       </div>
 
       {/* scope mix + docs */}
@@ -50,6 +53,7 @@ export default function Overview() {
         <div className="card">
           <h2>Documentation</h2>
           <DocBar label="Self-assessments" done={summary.docs.selfAssessments} total={summary.docs.total} />
+          <DocBar label="SBOMs" done={summary.docs.sboms} total={summary.docs.total} />
           <DocBar label="Declarations of Conformity" done={summary.docs.declarations} total={summary.docs.total} />
           <DocBar label="Technical documentation" done={summary.docs.techdocs} total={summary.docs.total} />
         </div>
@@ -83,6 +87,11 @@ export default function Overview() {
               <div className="muted small">
                 {p.inScope ? (p.tierLabel || 'In scope') : 'Out of scope'}
                 {p.readiness != null && ` · readiness ${p.readiness}%`}
+                {p.support?.status && p.support.status !== 'not-set' && (
+                  <span style={{ color: STATE_COLOR[p.support.status === 'expired' ? 'overdue' : p.support.status === 'ending-soon' ? 'due-soon' : 'submitted'] }}>
+                    {' · support '}{p.support.status}
+                  </span>
+                )}
               </div>
             </div>
             <DocDots p={p} />

@@ -62,6 +62,19 @@ export default function AssessmentDetail() {
       </div>
 
       <div className="card">
+        <h2>Support period</h2>
+        <p className="muted small">
+          Define how long you provide security updates.
+          {assessment.supportPeriod?.end ? ` Ends ${assessment.supportPeriod.end}.` : ''}
+        </p>
+        <div className="btn-row">
+          <Link className="btn" to={`/assessments/${assessment.id}/support`}>
+            {assessment.supportPeriod ? 'Edit support period' : 'Set support period'}
+          </Link>
+        </div>
+      </div>
+
+      <div className="card">
         <h2>SBOM — software bill of materials</h2>
         <p className="muted small">
           Track your components (Annex I, Part II) and export a CycloneDX file.

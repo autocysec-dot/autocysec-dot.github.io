@@ -9,6 +9,7 @@ import SelfAssessment from './pages/SelfAssessment.jsx';
 import Declaration from './pages/Declaration.jsx';
 import TechDoc from './pages/TechDoc.jsx';
 import Sbom from './pages/Sbom.jsx';
+import SupportPeriod from './pages/SupportPeriod.jsx';
 import Register from './pages/Register.jsx';
 import Settings from './pages/Settings.jsx';
 
@@ -89,6 +90,10 @@ export default function App() {
         <Route
           path="/assessments/:id/sbom"
           element={<RequireAuth><Sbom /></RequireAuth>}
+        />
+        <Route
+          path="/assessments/:id/support"
+          element={<RequireAuth><SupportPeriod /></RequireAuth>}
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
