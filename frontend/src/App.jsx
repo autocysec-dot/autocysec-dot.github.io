@@ -3,6 +3,7 @@ import { useAuth } from './auth.jsx';
 import Login from './pages/Login.jsx';
 import Classifier from './pages/Classifier.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import Overview from './pages/Overview.jsx';
 import AssessmentDetail from './pages/AssessmentDetail.jsx';
 import SelfAssessment from './pages/SelfAssessment.jsx';
 import Declaration from './pages/Declaration.jsx';
@@ -23,6 +24,7 @@ function Nav() {
       </a>
       <a href="../" className="muted small" title="CRA solution page">← CRA</a>
       <NavLink to="/" end>Classify</NavLink>
+      {user && <NavLink to="/overview">Overview</NavLink>}
       {user && <NavLink to="/assessments">My assessments</NavLink>}
       {user && <NavLink to="/register">Register</NavLink>}
       <div className="spacer" />
@@ -55,6 +57,10 @@ export default function App() {
         <Route path="/" element={<Classifier />} />
         <Route path="/login" element={<Login />} />
         <Route path="/settings" element={<Settings />} />
+        <Route
+          path="/overview"
+          element={<RequireAuth><Overview /></RequireAuth>}
+        />
         <Route
           path="/assessments"
           element={<RequireAuth><Dashboard /></RequireAuth>}

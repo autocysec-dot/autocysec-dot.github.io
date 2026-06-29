@@ -87,6 +87,7 @@ export const api = {
   updateIncident: (id, body) => request(`/api/register/incidents/${id}`, { method: 'PUT', body, auth: true }),
   deleteIncident: (id) => request(`/api/register/incidents/${id}`, { method: 'DELETE', auth: true }),
 
+  dashboard: () => request('/api/dashboard', { auth: true }),
   listAssessments: () => request('/api/assessments', { auth: true }),
   getAssessment: (id) => request(`/api/assessments/${id}`, { auth: true }),
   saveAssessment: (payload) => request('/api/assessments', { method: 'POST', body: payload, auth: true }),
