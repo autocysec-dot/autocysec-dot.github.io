@@ -147,7 +147,7 @@ export default function Sbom() {
             <Stat label="Critical / High" value={`${scan.summary.critical} / ${scan.summary.high}`} />
           </div>
           {scan.truncated && <div className="muted small" style={{ color: 'var(--amber)' }}>Only the first {scan.componentsScanned} of {scan.componentsTotal} components were scanned (rate limit). Add an NVD API key to scan more.</div>}
-          {!scan.usedApiKey && <div className="muted small">Tip: add a free NVD API key on your backend (.env) for faster, larger scans.</div>}
+          {scan.engine === 'nvd' && !scan.usedApiKey && <div className="muted small">Tip: install the local Grype scanner (or add an NVD API key) for faster, offline scans.</div>}
 
           {scan.findings.filter((f) => f.vulnerabilities.length).length === 0 && (
             <p className="muted" style={{ marginTop: 10 }}>No known CVEs matched the scanned components. 🎉</p>
@@ -172,6 +172,7 @@ export default function Sbom() {
                     </button>
                   </div>
                   {v.description && <p className="small" style={{ margin: '6px 0' }}>{v.description}</p>}
+                  {v.fixedIn && <p className="small" style={{ margin: '2px 0', color: 'var(--green)' }}>Fixed in: {v.fixedIn}</p>}
                   <p className="small" style={{ margin: 0, color: v.reportable ? '#fca5a5' : 'var(--muted)' }}>
                     <strong>Recommended:</strong> {v.action}
                   </p>
