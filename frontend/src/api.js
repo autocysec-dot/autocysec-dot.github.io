@@ -78,6 +78,8 @@ export const api = {
   saveSbom: (id, components) =>
     request(`/api/assessments/${id}/sbom`, { method: 'PUT', body: { components }, auth: true }),
   exportSbom: (id) => request(`/api/assessments/${id}/sbom/export`, { auth: true }),
+  importSbom: (id, content) => request(`/api/assessments/${id}/sbom/import`, { method: 'POST', body: { content }, auth: true }),
+  scanSbom: (id) => request(`/api/assessments/${id}/sbom/scan`, { method: 'POST', auth: true }),
   saveSupport: (id, body) => request(`/api/assessments/${id}/support`, { method: 'PUT', body, auth: true }),
   getPackage: (id) => request(`/api/assessments/${id}/package`, { auth: true }),
 

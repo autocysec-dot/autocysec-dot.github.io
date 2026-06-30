@@ -1,47 +1,95 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 
 const TYPES = ['library', 'framework', 'application', 'operating-system', 'firmware', 'device', 'file'];
 const blank = { name: '', version: '', type: 'library', supplier: '', license: '', purl: '' };
+const SEV_COLOR = { CRITICAL: 'var(--red)', HIGH: '#fb923c', MEDIUM: 'var(--amber)', LOW: '#93c5fd' };
 
 export default function Sbom() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const fileRef = useRef(null);
   const [assessment, setAssessment] = useState(null);
   const [rows, setRows] = useState([]);
   const [summary, setSummary] = useState(null);
+  const [scan, setScan] = useState(null);
+  const [stale, setStale] = useState(false);
   const [error, setError] = useState('');
-  const [saved, setSaved] = useState('');
+  const [msg, setMsg] = useState('');
+  const [scanning, setScanning] = useState(false);
+  const [added, setAdded] = useState(new Set());
 
+  function loadFromAssessment(a) {
+    setAssessment(a);
+    setRows(a.sbom?.components?.length ? a.sbom.components : [{ ...blank }]);
+    setSummary(a.sbom?.summary || null);
+    setScan(a.sbom?.scan || null);
+    setStale(Boolean(a.sbomScanStale));
+  }
   useEffect(() => {
-    api.getAssessment(id)
-      .then((d) => {
-        setAssessment(d.assessment);
-        setRows(d.assessment.sbom?.components?.length ? d.assessment.sbom.components : [{ ...blank }]);
-        setSummary(d.assessment.sbom?.summary || null);
-      })
-      .catch((e) => setError(e.message));
+    api.getAssessment(id).then((d) => loadFromAssessment(d.assessment)).catch((e) => setError(e.message));
   }, [id]);
 
-  if (error) return <div className="container"><div className="error">{error}</div></div>;
+  if (error && !assessment) return <div className="container"><div className="error">{error}</div></div>;
   if (!assessment) return <div className="center spinner">Loading…</div>;
 
-  const setCell = (i, k) => (e) => {
-    const next = rows.slice();
-    next[i] = { ...next[i], [k]: e.target.value };
-    setRows(next);
-  };
+  const setCell = (i, k) => (e) => { const n = rows.slice(); n[i] = { ...n[i], [k]: e.target.value }; setRows(n); };
   const addRow = () => setRows([...rows, { ...blank }]);
   const removeRow = (i) => setRows(rows.filter((_, x) => x !== i));
 
   async function save() {
-    setError(''); setSaved('');
+    setError(''); setMsg('');
     try {
       const { sbom } = await api.saveSbom(id, rows);
       setSummary(sbom.summary);
       setRows(sbom.components.length ? sbom.components : [{ ...blank }]);
-      setSaved(`Saved — ${sbom.summary.count} component(s).`);
+      setMsg(`Saved — ${sbom.summary.count} component(s).`);
+    } catch (e) { setError(e.message); }
+  }
+
+  function onFile(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      setError(''); setMsg('');
+      try {
+        const { format, sbom } = await api.importSbom(id, String(reader.result));
+        setRows(sbom.components.length ? sbom.components : [{ ...blank }]);
+        setSummary(sbom.summary);
+        setMsg(`Imported ${sbom.summary.count} component(s) from ${format}. Now scan for vulnerabilities.`);
+      } catch (e) { setError(e.message); }
+      if (fileRef.current) fileRef.current.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  async function runScan() {
+    setScanning(true); setError(''); setMsg('');
+    try {
+      await save(); // ensure latest components are saved first
+      const { scan } = await api.scanSbom(id);
+      setScan(scan);
+      setStale(false);
+    } catch (e) { setError(e.message); }
+    finally { setScanning(false); }
+  }
+
+  async function addToRegister(comp, v) {
+    try {
+      await api.createVulnerability({
+        title: `${v.id} — ${comp.name}${comp.version ? ' ' + comp.version : ''}`,
+        product: assessment.productName,
+        cve: v.id,
+        cvss: v.score ?? '',
+        severity: (v.severity || '').toLowerCase(),
+        activelyExploited: v.exploited ? 'yes' : 'no',
+        status: 'open',
+        awareDate: new Date().toISOString(),
+        description: v.description,
+      });
+      setAdded((s) => new Set(s).add(v.id));
     } catch (e) { setError(e.message); }
   }
 
@@ -51,35 +99,92 @@ export default function Sbom() {
     const blob = new Blob([JSON.stringify(doc, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = window.document.createElement('a');
-    a.href = url;
-    a.download = `${assessment.productName.replace(/\s+/g, '_')}_sbom_cyclonedx.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    a.href = url; a.download = `${assessment.productName.replace(/\s+/g, '_')}_sbom_cyclonedx.json`;
+    a.click(); URL.revokeObjectURL(url);
   }
 
   return (
     <div className="container wide">
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <h1 style={{ flex: 1 }}>SBOM — {assessment.productName}</h1>
+        <h1 style={{ flex: 1 }}>SBOM &amp; vulnerabilities — {assessment.productName}</h1>
         <button className="btn secondary" onClick={() => navigate(`/assessments/${id}`)}>Back</button>
       </div>
       <p className="muted">
-        Software Bill of Materials. The CRA (Annex I, Part II) requires at least your top-level
-        dependencies in a machine-readable format. Export as CycloneDX 1.5.
+        Upload a Software Bill of Materials, then scan its components against the NVD (NIST) CVE
+        database. Actively-exploited vulnerabilities (CISA KEV) are flagged for CRA reporting.
       </p>
 
-      {summary && (
-        <div className="card" style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center' }}>
-          <div><div className="muted small">Components</div><div style={{ fontSize: 26, fontWeight: 800 }}>{summary.count}</div></div>
-          <div className="muted small">
-            {summary.suppliers} supplier(s) · {summary.licenses.length} licence(s)
-            {summary.missingVersion > 0 && <span style={{ color: 'var(--amber)' }}> · {summary.missingVersion} missing version</span>}
-            {summary.missingLicense > 0 && <span style={{ color: 'var(--amber)' }}> · {summary.missingLicense} missing licence</span>}
+      {/* import + summary */}
+      <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <input ref={fileRef} type="file" accept=".json,.cdx,application/json" onChange={onFile} style={{ display: 'none' }} />
+          <button className="btn" onClick={() => fileRef.current?.click()}>⬆ Upload SBOM (CycloneDX / SPDX)</button>
+        </div>
+        {summary && <div className="muted small">{summary.count} component(s){summary.missingVersion ? ` · ${summary.missingVersion} missing version` : ''}</div>}
+        <div style={{ flex: 1 }} />
+        <button className="btn" onClick={runScan} disabled={scanning}>
+          {scanning ? 'Scanning…' : '🔍 Scan for vulnerabilities'}
+        </button>
+      </div>
+      {msg && <div className="success">{msg}</div>}
+      {error && <div className="error">{error}</div>}
+      {scanning && <div className="card muted">Scanning against NVD + CISA KEV — this can take up to a minute (longer without an NVD API key)…</div>}
+
+      {/* scan results */}
+      {scan && (
+        <div className="card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <h2 style={{ margin: 0, flex: 1 }}>Vulnerabilities</h2>
+            <span className="muted small">
+              Scanned {new Date(scan.scannedAt).toLocaleString()} · {scan.source}
+              {stale && <span style={{ color: 'var(--amber)' }}> · stale, rescan recommended</span>}
+            </span>
           </div>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', margin: '10px 0' }}>
+            <Stat label="Vulnerabilities" value={scan.summary.vulnerabilities} />
+            <Stat label="Actively exploited" value={scan.summary.exploited} color={scan.summary.exploited ? 'var(--red)' : 'var(--green)'} />
+            <Stat label="Reportable (CRA)" value={scan.summary.reportable} color={scan.summary.reportable ? 'var(--red)' : 'var(--green)'} />
+            <Stat label="Critical / High" value={`${scan.summary.critical} / ${scan.summary.high}`} />
+          </div>
+          {scan.truncated && <div className="muted small" style={{ color: 'var(--amber)' }}>Only the first {scan.componentsScanned} of {scan.componentsTotal} components were scanned (rate limit). Add an NVD API key to scan more.</div>}
+          {!scan.usedApiKey && <div className="muted small">Tip: add a free NVD API key on your backend (.env) for faster, larger scans.</div>}
+
+          {scan.findings.filter((f) => f.vulnerabilities.length).length === 0 && (
+            <p className="muted" style={{ marginTop: 10 }}>No known CVEs matched the scanned components. 🎉</p>
+          )}
+          {scan.findings.filter((f) => f.vulnerabilities.length).map((f) => (
+            <div key={f.component.name + f.component.version} style={{ borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 10 }}>
+              <strong>{f.component.name} {f.component.version}</strong> <span className="muted small">— {f.vulnerabilities.length} CVE(s)</span>
+              {f.vulnerabilities.map((v) => (
+                <div key={v.id} style={{ background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 8, padding: 10, margin: '8px 0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <a href={v.url} target="_blank" rel="noreferrer" style={{ fontWeight: 600 }}>{v.id}</a>
+                    {v.severity && <span className="badge" style={{ background: '#1e293b', color: SEV_COLOR[(v.severity || '').toUpperCase()] || 'var(--text)' }}>{v.severity}{v.score != null ? ` ${v.score}` : ''}</span>}
+                    {v.exploited && <span className="badge" style={{ background: '#450a0a', color: '#fca5a5' }}>⚠ Actively exploited</span>}
+                    <div style={{ flex: 1 }} />
+                    <button
+                      className={`btn ${added.has(v.id) ? 'secondary' : ''}`}
+                      style={{ padding: '4px 10px', fontSize: 12 }}
+                      disabled={added.has(v.id)}
+                      onClick={() => addToRegister(f.component, v)}
+                    >
+                      {added.has(v.id) ? '✓ In register' : 'Add to register'}
+                    </button>
+                  </div>
+                  {v.description && <p className="small" style={{ margin: '6px 0' }}>{v.description}</p>}
+                  <p className="small" style={{ margin: 0, color: v.reportable ? '#fca5a5' : 'var(--muted)' }}>
+                    <strong>Recommended:</strong> {v.action}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
       )}
 
+      {/* component table */}
       <div className="card" style={{ overflowX: 'auto' }}>
+        <h2 style={{ fontSize: 16 }}>Components</h2>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ textAlign: 'left', color: 'var(--muted)' }}>
@@ -110,9 +215,16 @@ export default function Sbom() {
           <button className="btn" onClick={save}>Save SBOM</button>
           <button className="btn secondary" onClick={exportJson}>Export CycloneDX</button>
         </div>
-        {saved && <div className="success">{saved}</div>}
-        {error && <div className="error">{error}</div>}
       </div>
+    </div>
+  );
+}
+
+function Stat({ label, value, color }) {
+  return (
+    <div>
+      <div className="muted small">{label}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: color || 'var(--text)' }}>{value}</div>
     </div>
   );
 }
