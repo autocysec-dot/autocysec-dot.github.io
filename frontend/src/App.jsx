@@ -24,10 +24,9 @@ function Nav() {
       {/* Leave the SPA and go back up to the ComplyPS site. The tool is served
           at /complyps-cra/app/, so ../../ is the ComplyPS home and ../ is the
           CRA solution page. */}
-      <a href="../../" className="brand" title="Back to ComplyPS">
-        Comply<span>PS</span>
-      </a>
-      <a href="../" className="muted small" title="CRA solution page">← CRA</a>
+      <a href="../../" className="muted small" title="Back to ComplyPS">← ComplyPS</a>
+      <span className="muted small" style={{ opacity: 0.4 }}>/</span>
+      <a href="../" className="brand" title="CRA Solution page">CRA Solution</a>
       {user && <NavLink to="/overview">Overview</NavLink>}
       {user && <NavLink to="/assessments">Projects</NavLink>}
       <NavLink to="/" end>New product</NavLink>
