@@ -79,10 +79,15 @@ export default function AssessmentDetail() {
                 <div className="step-body card" style={s.id === 'package' ? { borderColor: 'var(--primary)' } : undefined}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                     <strong style={{ flex: 1 }}>{s.title}</strong>
+                    {s.companyLevel && <span className="badge" style={{ background: '#1e293b', color: '#93c5fd' }}>company-wide</span>}
                     <span className="badge" style={{ background: '#1e293b', color: st.color }}>{st.label}</span>
                   </div>
                   <div className="muted small" style={{ margin: '4px 0 10px' }}>{s.detail}</div>
-                  {s.route ? (
+                  {s.path ? (
+                    <Link className={`btn ${s.status === 'done' ? 'secondary' : ''}`} to={s.path} style={{ padding: '6px 14px' }}>
+                      {s.actionLabel}
+                    </Link>
+                  ) : s.route ? (
                     <Link className={`btn ${s.status === 'done' ? 'secondary' : ''}`} to={`/assessments/${id}/${s.route}`} style={{ padding: '6px 14px' }}>
                       {s.actionLabel}
                     </Link>

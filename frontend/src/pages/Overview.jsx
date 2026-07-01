@@ -21,6 +21,8 @@ export default function Overview() {
   const { summary, reporting, products, keyDates } = data;
   const readinessColor = summary.avgReadiness == null ? 'var(--muted)'
     : summary.avgReadiness >= 80 ? 'var(--green)' : summary.avgReadiness >= 50 ? 'var(--amber)' : 'var(--red)';
+  const cov = summary.overallCoverage;
+  const covColor = cov == null ? 'var(--muted)' : cov >= 80 ? 'var(--green)' : cov >= 50 ? 'var(--amber)' : 'var(--red)';
 
   return (
     <div className="container wide">
@@ -29,6 +31,7 @@ export default function Overview() {
 
       {/* top stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 8 }}>
+        <Stat label="Overall coverage" value={cov == null ? '—' : `${cov}%`} color={covColor} sub="across all products" />
         <Stat label="Products" value={summary.totalProducts} sub={`${summary.inScopeCount} in scope · ${summary.outOfScopeCount} out`} />
         <Stat label="Avg Annex I readiness" value={summary.avgReadiness == null ? '—' : `${summary.avgReadiness}%`} color={readinessColor} />
         <Stat label="Reporting overdue" value={reporting.overdue} color={reporting.overdue ? 'var(--red)' : 'var(--green)'} sub={`${reporting.dueSoon} due soon`} />
@@ -56,6 +59,22 @@ export default function Overview() {
           <DocBar label="SBOMs" done={summary.docs.sboms} total={summary.docs.total} />
           <DocBar label="Declarations of Conformity" done={summary.docs.declarations} total={summary.docs.total} />
           <DocBar label="Technical documentation" done={summary.docs.techdocs} total={summary.docs.total} />
+        </div>
+      </div>
+
+      {/* company-wide items (done once, apply to all products) */}
+      <div className="card">
+        <h2>Company-wide</h2>
+        <p className="muted small">Set up once for your whole company — counts toward every product's coverage.</p>
+        <div className="list-item">
+          <div className="grow">
+            <strong>Coordinated vulnerability disclosure (CVD) policy</strong>
+            <div className="muted small">{summary.cvdPolicy ? 'In place — applies to all products' : 'Not set yet'}</div>
+          </div>
+          <span className="badge" style={{ background: '#1e293b', color: summary.cvdPolicy ? 'var(--green)' : 'var(--amber)' }}>
+            {summary.cvdPolicy ? '✓ done' : 'to do'}
+          </span>
+          <Link className="btn" to="/cvd-policy">{summary.cvdPolicy ? 'View / edit' : 'Create now'}</Link>
         </div>
       </div>
 

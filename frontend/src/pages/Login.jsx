@@ -68,7 +68,9 @@ export default function Login() {
       <div className="card">
         <h1>{mode === 'login' ? 'Log in' : 'Create an account'}</h1>
         <p className="muted small">
-          Accounts let you save and revisit assessments. The classifier itself works without logging in.
+          Your ComplyPS account saves your work and lets you revisit past reports. One account works
+          across all ComplyPS regulation tools (CRA today, more coming). The classifier itself works
+          without logging in.
         </p>
         {error && <div className="error">{error}</div>}
         <form onSubmit={submit}>
